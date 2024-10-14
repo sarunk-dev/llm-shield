@@ -122,7 +122,7 @@ Assistant: Online education platforms provide flexible, affordable learning opti
     const res = await watsonxAIService.generateText(params);
     console.log("\n\n***** WEBSITE SUMMARY FROM MODEL *****");
     console.log(res.result.results[0].generated_text);
-    return res.result.results[0].generated_text;
+    return `${res.result.results[0].generated_text}`;
   } catch (err) {
     console.warn(err);
     return "Failed to generate summary due to an error.";

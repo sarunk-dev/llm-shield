@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Base Summarizer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app"></div>
+
+    <script>
+        // Initial navigation state
+        const state = {
+            currentPage: 'inputPage',
+            summaryId: null,
+        };
+
+        function render() {
+            if (state.currentPage === 'inputPage') {
+                renderInputPage();
+            } else if (state.currentPage === 'summaryPage') {
+                renderSummaryPage(state.summaryId);
+            }
+        }
+
+        function renderInputPage() {
+            const app = document.getElementById('app');
+            app.innerHTML = '';
+
+            const container = document.createElement('div');
+            container.className = 'container';
+            
+            const title = document.createElement('h2');
+            title.textContent = 'Knowledge Base Summarizer';
+            container.appendChild(title);
+
+            const description = document.createElement('p');
+            description.textContent = 'Enter a link below to get a summary of the URL, including important images associated with the information.';
+            container.appendChild(description);
+
+            const inputField = document.createElement('input');
+            inputField.type = 'text';
+            inputField.placeholder = 'Enter URL';
+            inputField.id = 'urlInput';
+            container.appendChild(inputField);
+
+            const submitButton = document.createElement('button');
+            submitButton.textContent = 'Summarize';
+            submitButton.onclick = async () => {
+                const url = inputField.value;
+                if (!url) {
+                    alert('Please enter a valid URL.');
+                    return;
+                }
+
+                let formattedUrl = url;
+                if (!/^https?:\/\//i.test(url)) {
+                    if (/^localhost/i.test(url)) {
+                        formattedUrl = 'http://' + url;
+                    } else {
+                        formattedUrl = 'https://' + url;
+                    }
+                }
+
+                try {
+                    const backendCall = `http://localhost:3001/summarize?url=${encodeURIComponent(formattedUrl)}`;
+                    const response = await fetch(backendCall);
+                    const data = await response.json();
+                    if (data.summaryId) {
+                        state.summaryId = data.summaryId;
+                        state.currentPage = 'summaryPage';
+                        render();
+                    } else {
+                        alert(`An error occurred: ${data.error || 'Unknown error occurred.'}`);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert(`An error occurred: ${error.message}`);
+                }
+            };
+            container.appendChild(submitButton);
+
+            app.appendChild(container);
+        }
+
+        function renderSummaryPage(id) {
+            const app = document.getElementById('app');
+            app.innerHTML = '';
+
+            const container = document.createElement('div');
+            container.className = 'container';
+
+            fetch(`http://localhost:3001/summary/${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data) {
+                        container.innerHTML = '<h5>Summary not found.</h5>';
+                    } else {
+                        const title = document.createElement('h2');
+                        title.textContent = 'Summary';
+                        container.appendChild(title);
+
+                        const summaryText = document.createElement('p');
+                        summaryText.innerHTML = data.summaryText;
+                        container.appendChild(summaryText);
+
+                        const imagesTitle = document.createElement('h3');
+                        imagesTitle.textContent = 'Notable Images';
+                        container.appendChild(imagesTitle);
+
+                        data.images.forEach((image, index) => {
+                            const imageCard = document.createElement('div');
+                            imageCard.className = 'image-card';
+                            
+                            const imgElement = document.createElement('img');
+                            imgElement.src = image.url;
+                            imgElement.alt = `Image ${index + 1}`;
+                            imageCard.appendChild(imgElement);
+                            
+                            const caption = document.createElement('p');
+                            caption.textContent = image.caption;
+                            imageCard.appendChild(caption);
+
+                            container.appendChild(imageCard);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    container.innerHTML = '<h5>Error loading summary.</h5>';
+                })
+                .finally(() => {
+                    const backButton = document.createElement('button');
+                    backButton.textContent = 'Back to Input Page';
+                    backButton.onclick = () => {
+                        state.currentPage = 'inputPage';
+                        render();
+                    };
+                    container.appendChild(backButton);
+                });
+
+            app.appendChild(container);
+        }
+
+        // Initial render
+        render();
+    </script>
+</body>
+</html>
