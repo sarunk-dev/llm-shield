@@ -5,12 +5,14 @@ import {
   Card,
   CardMedia,
   CardContent,
+  Button,
 } from "@mui/material";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 function SummaryPage() {
   const { id } = useParams();
   const [summaryData, setSummaryData] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch(`http://localhost:3001/summary/${id}`)
@@ -50,6 +52,14 @@ function SummaryPage() {
           </CardContent>
         </Card>
       ))}
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => navigate(-1)}
+        style={{ marginTop: "2rem" }}
+      >
+        Back to Input Page
+      </Button>
     </Container>
   );
 }

@@ -25,17 +25,22 @@ function InputPage() {
 
     setLoading(true);
     const backendCall = `http://localhost:3001/summarize?url=${encodeURIComponent(formattedUrl)}`;
-    console.log(`Fetching from: ${backendCall}`)
+    console.log(`Fetching from: ${backendCall}`);
     fetch(backendCall)
       .then((response) => response.json())
       .then((data) => {
         setLoading(false);
-        // Redirect to the summary page
-        navigate(`/summary/${data.summaryId}`);
+        if (data.summaryId) {
+          // Redirect to the summary page
+          navigate(`/summary/${data.summaryId}`);
+        } else {
+          alert(`An error occurred: ${data.error || 'Unknown error occurred.'}`);
+        }
       })
       .catch((error) => {
         console.error('Error:', error);
         setLoading(false);
+        alert(`An error occurred: ${error.message}`);
       });
   };
 
