@@ -31,7 +31,10 @@ app.use(express.json());
 let summaries = {};
 
 app.get("/summarize", async (req, res) => {
-  const url = req.query.url.replace("localhost", "127.0.0.1");
+  const url =
+    process.env.NODE_ENV === "production"
+      ? req.query.url.replace("localhost", "host.docker.internal")
+      : req.query.url.replace("localhost", "127.0.0.1");
   console.log(`Attempting to fetch: ${url}`);
   if (!url) {
     return res.status(400).json({ error: "URL parameter is required." });

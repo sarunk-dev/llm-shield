@@ -12,6 +12,7 @@ services:
     env_file:
       - ./dev.env
     environment:
+      - NODE_ENV=production
       - PORT=3001
     command: ["sh", "-c", "npm install --only=production && npm start"]
     volumes:
