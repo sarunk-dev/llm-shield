@@ -44,24 +44,30 @@ app.get("/summarize", async (req, res) => {
     const textContent = $("body").text();
     const imageElements = $("img");
     let images = [];
+    let captions = [];
 
     imageElements.each((i, elem) => {
       let src = $(elem).attr("src");
+      let alt = $(elem).attr("alt") || "No caption available";
       if (src && !src.startsWith("http")) {
         src = new URL(src, url).href;
       }
       if (src) {
         images.push(src);
+        captions.push(alt);
       }
     });
 
-    const summaryText = await generateSummary(textContent);
-    const imageCaptions = await generateImageCaptions(images);
+    const combinedContent = `${textContent}\nImages and Captions:\n${captions
+      .map((caption, index) => `Image: ${images[index]}, Caption: ${caption}`)
+      .join("\n")}`;
+
+    const summaryText = await generateSummary(combinedContent);
 
     const summaryId = uuidv4();
     summaries[summaryId] = {
       summaryText,
-      images: imageCaptions,
+      images: images.map((url, index) => ({ url, caption: captions[index] })),
     };
 
     res.json({ summaryId });
@@ -101,18 +107,11 @@ Assistant: Online education platforms provide flexible, affordable learning opti
     const res = await watsonxAIService.generateText(params);
     console.log("\n\n***** TEXT RESPONSE FROM MODEL *****");
     console.log(res.result.results[0].generated_text);
-    return res.result.results[0].generated_text; // return the generated text after it finishes
+    return res.result.results[0].generated_text;
   } catch (err) {
     console.warn(err);
     return "Failed to generate summary due to an error.";
   }
-}
-
-async function generateImageCaptions(imageUrls) {
-  return imageUrls.map((url) => ({
-    url,
-    caption: "This is a caption for the image.",
-  }));
 }
 
 function generateLlamaPrompt(systemPrompt, userPrompt) {
