@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        - NODE_ENV=production
+    ports:
+      - "3001:3001"
+    env_file:
+      - ./dev.env
+    environment:
+      - PORT=3001
+    command: ["sh", "-c", "npm install --only=production && npm start"]
+    volumes:
+      - ./backend:/app
+    stdin_open: true
+    tty: true
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - NODE_ENV=production
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+    command: ["sh", "-c", "npm install --only=production && npm start"]
+    volumes:
+      - ./frontend:/app
+    stdin_open: true
+    tty: true

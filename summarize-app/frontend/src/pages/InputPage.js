@@ -24,7 +24,7 @@ function InputPage() {
     }
 
     setLoading(true);
-    const backendCall = `http://localhost:5001/summarize?url=${encodeURIComponent(formattedUrl)}`;
+    const backendCall = `http://localhost:3001/summarize?url=${encodeURIComponent(formattedUrl)}`;
     console.log(`Fetching from: ${backendCall}`)
     fetch(backendCall)
       .then((response) => response.json())

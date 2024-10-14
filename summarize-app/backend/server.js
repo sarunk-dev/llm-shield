@@ -6,7 +6,7 @@ const { v4: uuidv4 } = require("uuid");
 const { WatsonXAI } = require("@ibm-cloud/watsonx-ai");
 
 const app = express();
-const port = 5001;
+const port = 3001;
 
 const watsonxAIService = WatsonXAI.newInstance({
   version: "2024-03-14",

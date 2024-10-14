@@ -27,3 +27,7 @@ backend-endpoint/summarize=<URL>
 backend-endpoint/summary=<summary-id>
   This returns summary text and image/captions
   This is stored in memory.
+
+
+# Running
+`docker-compose build --no-cache`
