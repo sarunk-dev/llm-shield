@@ -31,7 +31,8 @@ app.use(express.json());
 let summaries = {};
 
 app.get("/summarize", async (req, res) => {
-  const url = req.query.url;
+  const url = req.query.url.replace("localhost", "127.0.0.1");
+  console.log(`Attempting to fetch: ${url}`);
   if (!url) {
     return res.status(400).json({ error: "URL parameter is required." });
   }
@@ -62,12 +63,22 @@ app.get("/summarize", async (req, res) => {
       .map((caption, index) => `Image: ${images[index]}, Caption: ${caption}`)
       .join("\n")}`;
 
-    const summaryText = await generateSummary(combinedContent);
+    const summaryText = await generateWebSummary(combinedContent);
+
+    const summarizedImages = await Promise.all(
+      captions.map(async (caption) => {
+        const imageSummary = await generateImageSummary(caption);
+        return imageSummary;
+      })
+    );
 
     const summaryId = uuidv4();
     summaries[summaryId] = {
       summaryText,
-      images: images.map((url, index) => ({ url, caption: captions[index] })),
+      images: images.map((url, index) => ({
+        url,
+        caption: summarizedImages[index],
+      })),
     };
 
     res.json({ summaryId });
@@ -92,7 +103,8 @@ app.get("/summary/:id", (req, res) => {
   res.json(summary);
 });
 
-async function generateSummary(text) {
+async function generateWebSummary(text) {
+  // console.log(`Generating Summary for: ${text}`);
   try {
     const system = `Summarize the provided text without any introductory phrases or additional explanations. Only return the summary directly, and keep it under 100 words. Avoid mentioning the word limit or restating the instructions."
 
@@ -103,14 +115,30 @@ Assistant: Exercise significantly benefits mental health by reducing anxiety, de
 Example 2: User: Online education platforms have grown rapidly, offering flexibility, affordability, and access to a variety of courses for learners around the world.
     
 Assistant: Online education platforms provide flexible, affordable learning options with access to diverse courses globally.`;
-    params.input += generateLlamaPrompt(system, text);
+    params.input = generateLlamaPrompt(system, text);
     const res = await watsonxAIService.generateText(params);
-    console.log("\n\n***** TEXT RESPONSE FROM MODEL *****");
+    console.log("\n\n***** WEBSITE SUMMARY FROM MODEL *****");
     console.log(res.result.results[0].generated_text);
     return res.result.results[0].generated_text;
   } catch (err) {
     console.warn(err);
     return "Failed to generate summary due to an error.";
+  }
+}
+
+async function generateImageSummary(text) {
+  // console.log(`Generating Image Summary for: ${text}`);
+  try {
+    // const system = `Repeat what the user say`;
+    // params.input = generateLlamaPrompt(system, text);
+    // const res = await watsonxAIService.generateText(params);
+    // console.log("\n\n***** IMAGE SUMMARY FROM MODEL *****");
+    // console.log(res.result.results[0].generated_text);
+    // return res.result.results[0].generated_text;
+    return text;
+  } catch (err) {
+    console.warn(err);
+    return "Failed to generate image summary due to an error.";
   }
 }
 
