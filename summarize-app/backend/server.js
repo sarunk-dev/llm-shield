@@ -1,21 +1,39 @@
-const express = require('express');
-const cors = require('cors');
-const axios = require('axios');
-const cheerio = require('cheerio');
-const { v4: uuidv4 } = require('uuid');
+const express = require("express");
+const cors = require("cors");
+const axios = require("axios");
+const cheerio = require("cheerio");
+const { v4: uuidv4 } = require("uuid");
+const { WatsonXAI } = require("@ibm-cloud/watsonx-ai");
 
 const app = express();
 const port = 5001;
+
+const watsonxAIService = WatsonXAI.newInstance({
+  version: "2024-03-14",
+  serviceUrl: "https://us-south.ml.cloud.ibm.com",
+});
+
+const textGenRequestParametersModel = {
+  max_new_tokens: 1000,
+  stop_sequences: ["<|eot_id|>"],
+};
+
+const params = {
+  input: "",
+  modelId: "meta-llama/llama-3-2-3b-instruct",
+  projectId: "6217adff-b167-4467-9298-50d6b0220292",
+  parameters: textGenRequestParametersModel,
+};
 
 app.use(cors());
 app.use(express.json());
 
 let summaries = {};
 
-app.get('/summarize', async (req, res) => {
+app.get("/summarize", async (req, res) => {
   const url = req.query.url;
   if (!url) {
-    return res.status(400).json({ error: 'URL parameter is required.' });
+    return res.status(400).json({ error: "URL parameter is required." });
   }
 
   try {
@@ -23,13 +41,13 @@ app.get('/summarize', async (req, res) => {
     const html = response.data;
 
     const $ = cheerio.load(html);
-    const textContent = $('body').text();
-    const imageElements = $('img');
+    const textContent = $("body").text();
+    const imageElements = $("img");
     let images = [];
 
     imageElements.each((i, elem) => {
-      let src = $(elem).attr('src');
-      if (src && !src.startsWith('http')) {
+      let src = $(elem).attr("src");
+      if (src && !src.startsWith("http")) {
         src = new URL(src, url).href;
       }
       if (src) {
@@ -48,8 +66,8 @@ app.get('/summarize', async (req, res) => {
 
     res.json({ summaryId });
   } catch (error) {
-    console.error('Error:', error.message);
-    res.status(500).json({ error: 'Failed to process the URL.' });
+    console.error("Error:", error.message);
+    res.status(500).json({ error: "Failed to process the URL." });
   }
 });
 
@@ -57,25 +75,60 @@ app.listen(port, () => {
   console.log(`Backend server is running on port ${port}`);
 });
 
-app.get('/summary/:id', (req, res) => {
+app.get("/summary/:id", (req, res) => {
   const id = req.params.id;
   const summary = summaries[id];
 
   if (!summary) {
-    return res.status(404).json({ error: 'Summary not found.' });
+    return res.status(404).json({ error: "Summary not found." });
   }
 
   res.json(summary);
 });
 
-
 async function generateSummary(text) {
-  return 'This is a generated summary of the content.';
+  try {
+    const system = `Summarize the provided text without any introductory phrases or additional explanations. Only return the summary directly, and keep it under 100 words. Avoid mentioning the word limit or restating the instructions."
+
+Example 1: User: The research found that exercise has significant benefits on mental health, reducing anxiety, depression, and improving cognitive function.
+    
+Assistant: Exercise significantly benefits mental health by reducing anxiety, depression, and enhancing cognitive function.
+    
+Example 2: User: Online education platforms have grown rapidly, offering flexibility, affordability, and access to a variety of courses for learners around the world.
+    
+Assistant: Online education platforms provide flexible, affordable learning options with access to diverse courses globally.`;
+    params.input += generateLlamaPrompt(system, text);
+    const res = await watsonxAIService.generateText(params);
+    console.log("\n\n***** TEXT RESPONSE FROM MODEL *****");
+    console.log(res.result.results[0].generated_text);
+    return res.result.results[0].generated_text; // return the generated text after it finishes
+  } catch (err) {
+    console.warn(err);
+    return "Failed to generate summary due to an error.";
+  }
 }
 
 async function generateImageCaptions(imageUrls) {
   return imageUrls.map((url) => ({
     url,
-    caption: 'This is a caption for the image.',
+    caption: "This is a caption for the image.",
   }));
+}
+
+function generateLlamaPrompt(systemPrompt, userPrompt) {
+  const startHeaderId = "<|start_header_id|>";
+  const endHeaderId = "<|end_header_id|>";
+  const eotId = "<|eot_id|>";
+
+  const formattedPrompt = `
+${startHeaderId}system${endHeaderId}
+${systemPrompt}
+${eotId}
+${startHeaderId}user${endHeaderId}
+${userPrompt}
+${eotId}
+${startHeaderId}assistant${endHeaderId}
+`;
+
+  return formattedPrompt;
 }

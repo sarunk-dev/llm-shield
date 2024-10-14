@@ -16,11 +16,17 @@ function InputPage() {
   const handleSubmit = () => {
     let formattedUrl = url;
     if (!/^https?:\/\//i.test(url)) {
-      formattedUrl = 'https://' + url;
+      if (/^localhost/i.test(url)) {
+        formattedUrl = 'http://' + url;
+      } else {
+        formattedUrl = 'https://' + url;
+      }
     }
 
     setLoading(true);
-    fetch(`http://localhost:5001/summarize?url=${encodeURIComponent(formattedUrl)}`)
+    const backendCall = `http://localhost:5001/summarize?url=${encodeURIComponent(formattedUrl)}`;
+    console.log(`Fetching from: ${backendCall}`)
+    fetch(backendCall)
       .then((response) => response.json())
       .then((data) => {
         setLoading(false);
