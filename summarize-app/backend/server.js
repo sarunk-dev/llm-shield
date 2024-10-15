@@ -16,6 +16,31 @@ const watsonxAIService = WatsonXAI.newInstance({
 const textGenRequestParametersModel = {
   max_new_tokens: 4000,
   stop_sequences: ["<|eot_id|>"],
+  decoding_method: "sample",
+  random_seed: null,
+  temperature: 0.0,
+  top_k: 50,
+  top_p: 1,
+  repetition_penalty: 1,
+};
+
+const textGenRequestModerationsModel = {
+  hap: {
+    input: {
+      enabled: true,
+      threshold: 0.5,
+      mask: {
+        remove_entity_value: true,
+      },
+    },
+    output: {
+      enabled: true,
+      threshold: 0.5,
+      mask: {
+        remove_entity_value: true,
+      },
+    },
+  },
 };
 
 const params = {
@@ -23,6 +48,7 @@ const params = {
   modelId: "meta-llama/llama-3-2-3b-instruct",
   projectId: "6217adff-b167-4467-9298-50d6b0220292",
   parameters: textGenRequestParametersModel,
+  moderations: textGenRequestModerationsModel,
 };
 
 app.use(cors());
@@ -45,7 +71,8 @@ app.get("/summarize", async (req, res) => {
     const html = response.data;
 
     const $ = cheerio.load(html);
-    const textContent = $("body").text();
+    let textContent = $("body").text();
+    textContent = textContent.replace(/\s+/g, " ").trim();
     const imageElements = $("img");
     let images = [];
     let captions = [];
@@ -103,8 +130,8 @@ app.get("/summary/:id", (req, res) => {
 });
 
 async function generateWebSummary(text) {
-  console.log(`*** Beginning of Text to Summarize ***\n${text}`);
-  console.log(`*** End of Text to Summarize ***`);
+  // console.log(`*** Beginning of Text to Summarize ***\n${text}`);
+  // console.log(`*** End of Text to Summarize ***`);
   try {
     const system = `Summarize the provided text without any introductory phrases or additional explanations. Only return the summary directly, and keep it under 100 words. Avoid mentioning the word limit or restating the instructions."
 
@@ -116,6 +143,8 @@ Example 2: User: Online education platforms have grown rapidly, offering flexibi
     
 Assistant: Online education platforms provide flexible, affordable learning options with access to diverse courses globally.`;
     params.input = generateLlamaPrompt(system, text);
+    console.log(`*** Beginning of Text to Summarize ***\n${params.input}`);
+    console.log(`*** End of Text to Summarize ***`);
     const res = await watsonxAIService.generateText(params);
     console.log("\n\n***** WEBSITE SUMMARY FROM MODEL *****");
     console.log(res.result.results[0].generated_text);
@@ -127,8 +156,8 @@ Assistant: Online education platforms provide flexible, affordable learning opti
 }
 
 async function generateImageSummary(text) {
-  console.log(`*** Beginning of Text to Summarize ***\n${text}`);
-  console.log(`*** End of Text to Summarize ***`);
+  console.log(`*** Beginning of Image Text to Summarize ***\n${text}`);
+  console.log(`*** End of Image Text to Summarize ***`);
   try {
     const system = `Summarize the provided text without any introductory phrases or additional explanations. Only return the summary directly, and keep it under 10 words. Avoid mentioning the word limit or restating the instructions."
 
@@ -162,7 +191,6 @@ ${eotId}
 ${startHeaderId}user${endHeaderId}
 ${userPrompt}
 ${eotId}
-${startHeaderId}assistant${endHeaderId}
 `;
 
   return formattedPrompt;
