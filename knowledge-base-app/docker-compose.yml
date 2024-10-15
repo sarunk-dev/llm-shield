@@ -15,7 +15,7 @@ services:
       context: ./knowledge-base-denial
       dockerfile: Dockerfile
     ports:
-      - "4010:80"
+      - "4020:80"
     volumes:
       - ./knowledge-base-denial/data:/app/data
 
@@ -24,6 +24,6 @@ services:
       context: ./knowledge-base-xss
       dockerfile: Dockerfile
     ports:
-      - "4020:80"
+      - "4010:80"
     volumes:
       - ./knowledge-base-xss/data:/app/data
