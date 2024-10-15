@@ -56,11 +56,12 @@ app.use(express.json());
 
 let summaries = {};
 
-app.get("/summarize", async (req, res) => {
-  const url =
+app.post("/summarize", async (req, res) => {
+  let { firstName, experienceLevel, url } = req.body;
+  url =
     process.env.NODE_ENV === "production"
-      ? req.query.url.replace("localhost", "host.docker.internal")
-      : req.query.url.replace("localhost", "127.0.0.1");
+      ? url.replace("localhost", "host.docker.internal")
+      : url.replace("localhost", "127.0.0.1");
   console.log(`Attempting to fetch: ${url}`);
   if (!url) {
     return res.status(400).json({ error: "URL parameter is required." });
@@ -89,11 +90,11 @@ app.get("/summarize", async (req, res) => {
       }
     });
 
-    const summaryText = await generateWebSummary(textContent);
+    const summaryText = await generateWebSummary(textContent, firstName, experienceLevel);
 
     const summarizedImages = await Promise.all(
       captions.map(async (caption) => {
-        const imageSummary = await generateImageSummary(caption);
+        const imageSummary = await generateImageSummary(caption, firstName, experienceLevel);
         return imageSummary;
       })
     );
@@ -129,11 +130,11 @@ app.get("/summary/:id", (req, res) => {
   res.json(summary);
 });
 
-async function generateWebSummary(text) {
+async function generateWebSummary(text, firstName, experienceLevel) {
   // console.log(`*** Beginning of Text to Summarize ***\n${text}`);
   // console.log(`*** End of Text to Summarize ***`);
   try {
-    const system = `Summarize the provided text without any introductory phrases or additional explanations. Only return the summary directly, and keep it under 100 words. Avoid mentioning the word limit or restating the instructions."
+    const system = `${firstName} is a user with the following technology experience level: ${experienceLevel}. Help ${firstName} summarize the provided text without any introductory phrases or additional explanations. Only return the summary directly, and keep it under 100 words. Avoid mentioning the word limit or restating the instructions."
 
 Example 1: User: The research found that exercise has significant benefits on mental health, reducing anxiety, depression, and improving cognitive function.
     
@@ -155,11 +156,11 @@ Assistant: Online education platforms provide flexible, affordable learning opti
   }
 }
 
-async function generateImageSummary(text) {
+async function generateImageSummary(text, firstName, experienceLevel) {
   // console.log(`*** Beginning of Image Text to Summarize ***\n${text}`);
   // console.log(`*** End of Image Text to Summarize ***`);
   try {
-    const system = `Summarize the provided text without any introductory phrases or additional explanations. Only return the summary directly, and keep it under 10 words. Avoid mentioning the word limit or restating the instructions."
+    const system = `${firstName} is a user with the following technology experience level: ${experienceLevel}. Help ${firstName} summarize the provided text. Only return the summary directly, and keep it under 20 words. Avoid mentioning the word limit or restating the instructions."
 
 Example 1: User: The research found that exercise has significant benefits on mental health, reducing anxiety, depression, and improving cognitive function.
     
