@@ -143,11 +143,11 @@ Example 2: User: Online education platforms have grown rapidly, offering flexibi
     
 Assistant: Online education platforms provide flexible, affordable learning options with access to diverse courses globally.`;
     params.input = generateLlamaPrompt(system, text);
-    console.log(`*** Beginning of Text to Summarize ***\n${params.input}`);
-    console.log(`*** End of Text to Summarize ***`);
     const res = await watsonxAIService.generateText(params);
-    console.log("\n\n***** WEBSITE SUMMARY FROM MODEL *****");
-    console.log(res.result.results[0].generated_text);
+    // console.log(`*** Beginning of Text to Summarize ***\n${params.input}`);
+    // console.log(`*** End of Text to Summarize ***`);
+    // console.log("\n\n***** WEBSITE SUMMARY FROM MODEL *****");
+    // console.log(res.result.results[0].generated_text);
     return `${res.result.results[0].generated_text}`;
   } catch (err) {
     console.warn(err);
@@ -156,8 +156,8 @@ Assistant: Online education platforms provide flexible, affordable learning opti
 }
 
 async function generateImageSummary(text) {
-  console.log(`*** Beginning of Image Text to Summarize ***\n${text}`);
-  console.log(`*** End of Image Text to Summarize ***`);
+  // console.log(`*** Beginning of Image Text to Summarize ***\n${text}`);
+  // console.log(`*** End of Image Text to Summarize ***`);
   try {
     const system = `Summarize the provided text without any introductory phrases or additional explanations. Only return the summary directly, and keep it under 10 words. Avoid mentioning the word limit or restating the instructions."
 
@@ -170,8 +170,10 @@ Example 2: User: Online education platforms have grown rapidly, offering flexibi
 Assistant: Online education platforms provide affordable courses globally.`;
     params.input = generateLlamaPrompt(system, text);
     const res = await watsonxAIService.generateText(params);
-    console.log("\n\n***** IMAGE SUMMARY FROM MODEL *****");
-    console.log(res.result.results[0].generated_text);
+    // console.log(`*** Beginning of Text to Summarize ***\n${params.input}`);
+    // console.log(`*** End of Text to Summarize ***`);
+    // console.log("\n\n***** IMAGE SUMMARY FROM MODEL *****");
+    // console.log(res.result.results[0].generated_text);
     return res.result.results[0].generated_text;
   } catch (err) {
     console.warn(err);
