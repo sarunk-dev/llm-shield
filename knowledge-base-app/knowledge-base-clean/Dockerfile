@@ -2,7 +2,7 @@ FROM nginx:alpine
 
 WORKDIR /usr/share/nginx/html
 
-COPY knowledge-base.html /usr/share/nginx/html/index.html
+COPY knowledge-base-clean.html /usr/share/nginx/html/index.html
 
 COPY data/ /usr/share/nginx/html/data/
 

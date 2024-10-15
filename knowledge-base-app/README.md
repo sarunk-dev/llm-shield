@@ -1,133 +1,13 @@
 # Knowledge App
 
-## Description
-This is static frontend page that has the following information
+## Build
 
-
-### **Widgetify Integration Knowledge Base**
----
-
-### **1. Introduction to Widgetify API Integration**
-
-The **Widgetify** API allows SaaS products to seamlessly integrate widgets into their platform, offering real-time data visualization, user interactivity, and custom widget creation. Integrating the API involves configuring authentication, setting up the API endpoint, and managing real-time data streams.
-
-_**[Image Placeholder]**: Diagram showing how Widgetify API integrates with a SaaS platform, illustrating data flow between the API and the SaaS product._
-
----
-
-### **2. Getting Started with Widgetify API**
-
-#### **Authentication Setup**
-To interact with the Widgetify API, your system must authenticate using OAuth 2.0. Below are the steps to authenticate and acquire an access token:
-
-1. **Request Access Token**:
-   - Endpoint: `POST /oauth/token`
-   - Example request:
-     ```bash
-     curl -X POST https://api.widgetify.com/oauth/token \
-     -d "client_id=YOUR_CLIENT_ID" \
-     -d "client_secret=YOUR_CLIENT_SECRET" \
-     -d "grant_type=client_credentials"
-     ```
-
-2. **Access Token Usage**:
-   Once you receive the token, include it in the header for all API requests:
-   ```bash
-   Authorization: Bearer YOUR_ACCESS_TOKEN
-   ```
-
-_**[Image Placeholder]**: Screenshot of a terminal with an example of a successful OAuth token request and response for Widgetify API._
-
----
-
-### **3. Key Endpoints for Widgetify API**
-
-#### **Fetching Widget Data**
-To retrieve widget data, make a `GET` request to the following endpoint:
-```bash
-GET /widgets/{widget_id}
-```
-- **Parameters**:
-  - `widget_id`: The ID of the widget you want to fetch.
-  - `filters`: Optional filters to customize the data returned.
-
-Example Response:
-```json
-{
-  "widget_id": "abc123",
-  "widget_name": "Sales Dashboard",
-  "data": {...}
-}
-```
-
-#### **Creating Custom Widgets**
-To create a new widget, send a `POST` request:
-```bash
-POST /widgets
-```
-- **Body**:
-  - `widget_name`: The name of the new widget.
-  - `configuration`: JSON object containing widget settings.
-
-_**[Image Placeholder]**: Image showing a graphical interface with various widget configurations, demonstrating how developers can customize widgets in the Widgetify API dashboard._
-
----
-
-### **4. Troubleshooting Common Issues**
-
-#### **1. Invalid Access Token**
-If you receive an invalid token error (`401 Unauthorized`), ensure that:
-- Your token hasn’t expired.
-- The `Authorization` header is correctly formatted with the bearer token.
-
-**Solution**:
-- Re-authenticate by following the OAuth process and updating your token.
-
-#### **2. Rate Limit Exceeded**
-The Widgetify API imposes rate limits to prevent abuse. If you exceed these limits, you will receive a `429 Too Many Requests` error.
-
-**Solution**:
-- Implement exponential backoff in your API calls to handle rate limits.
-
-#### **3. Widget Not Displaying Correct Data**
-If your widget isn’t displaying data as expected, double-check the filters and data stream settings. Incorrect filters may lead to incomplete data.
-
-_**[Image Placeholder]**: Flowchart showing the common error codes (`401`, `429`) and their corresponding solutions, making it easier to troubleshoot integration issues._
-
----
-
-### **5. Best Practices for Using the Widgetify API**
-
-1. **Optimize API Calls**:
-   - Minimize the number of API calls by using pagination and data caching where possible.
-
-2. **Monitor API Usage**:
-   - Use the Widgetify dashboard to monitor your API usage and avoid hitting rate limits.
-
-3. **Security Considerations**:
-   - Ensure that all API requests are made over HTTPS.
-   - Regularly rotate access tokens to reduce the risk of compromised credentials.
-
----
-
-### **6. FAQ: Frequently Asked Questions**
-
-#### **Q1: How can I reset my API credentials?**
-Navigate to the Widgetify dashboard, and under the **API Settings** section, you can generate new API credentials and invalidate old ones.
-
-#### **Q2: How do I add a custom widget to my SaaS product?**
-Use the `/widgets` endpoint to create a new widget and integrate it into your platform using the provided widget ID.
-
-#### **Q3: What’s the maximum data size for widget configurations?**
-The Widgetify API allows up to 1MB of data for widget configurations. For larger data sets, use data compression or make multiple API requests.
-
----
-
-
-
+`docker-compose build --no-cache`
 
 ## Deployment
 
-A dockerfile that creates an image on frontend and backend app and serve it
-A docker-compose.yml file that spins up the container and attach localhost:4000
+`docker-compose up`
 
+Clean Container Port: 4000
+XSS Container Port: 4010
+Denial Container Port: 4020

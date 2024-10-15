@@ -1,8 +1,29 @@
+version: "3.8"
+
 services:
-  web:
-    build: .
+  knowledge-base-clean:
+    build:
+      context: ./knowledge-base-clean
+      dockerfile: Dockerfile
     ports:
       - "4000:80"
     volumes:
-      - ./data:/usr/share/nginx/html/data
-    restart: always
+      - ./knowledge-base-clean/data:/app/data
+
+  knowledge-base-denial:
+    build:
+      context: ./knowledge-base-denial
+      dockerfile: Dockerfile
+    ports:
+      - "4010:80"
+    volumes:
+      - ./knowledge-base-denial/data:/app/data
+
+  knowledge-base-xss:
+    build:
+      context: ./knowledge-base-xss
+      dockerfile: Dockerfile
+    ports:
+      - "4020:80"
+    volumes:
+      - ./knowledge-base-xss/data:/app/data
