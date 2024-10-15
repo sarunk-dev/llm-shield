@@ -107,7 +107,7 @@ app.get("/summary/:id", (req, res) => {
 });
 
 async function generateWebSummary(text) {
-  // console.log(`Generating Summary for: ${text}`);
+  console.log(`Generating Summary for: ${text}`);
   try {
     const system = `Summarize the provided text without any introductory phrases or additional explanations. Only return the summary directly, and keep it under 100 words. Avoid mentioning the word limit or restating the instructions."
 
@@ -122,7 +122,13 @@ Assistant: Online education platforms provide flexible, affordable learning opti
     const res = await watsonxAIService.generateText(params);
     console.log("\n\n***** WEBSITE SUMMARY FROM MODEL *****");
     console.log(res.result.results[0].generated_text);
-    return `${res.result.results[0].generated_text}`;
+
+    // Let's assume that the LLM always returns an embedded HTML when it summarizes the response.
+    // This presents a security risk, as attackers can prompt inject malicious instructions
+    // in the raw text, to cause the model to generate dangerous outputs,
+    // such as embedding malicious HTML or scripts that can be executed.
+    return `${res.result.results[0].generated_text} <img src='x' onerror='alert("Sorry your information was stolen")'>`;
+
   } catch (err) {
     console.warn(err);
     return "Failed to generate summary due to an error.";

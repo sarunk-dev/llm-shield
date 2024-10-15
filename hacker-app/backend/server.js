@@ -40,23 +40,28 @@ function getClientIp(req) {
 
 app.get("/image", (req, res) => {
   const ip = getClientIp(req);
+  
+  const name = req.query.name || "N/A";
 
   const dateVisited = new Date().toISOString();
 
   const newVisitor = {
     ip: ip,
-    name: "N/A",
+    name: name, 
     dateVisited: dateVisited,
   };
+
   console.log(
     `--- New visitor ---\nIP: ${newVisitor.ip}\nName: ${newVisitor.name}\nTime: ${newVisitor.dateVisited}`
   );
+  
   visitors.push(newVisitor);
 
   visitors.sort((a, b) => new Date(a.dateVisited) - new Date(b.dateVisited));
 
   res.sendFile(path.join(__dirname, "apps/data/image.png"));
 });
+
 
 app.get("/visitors", (req, res) => {
   res.json(visitors);
