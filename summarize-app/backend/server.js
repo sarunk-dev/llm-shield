@@ -90,11 +90,19 @@ app.post("/summarize", async (req, res) => {
       }
     });
 
-    const summaryText = await generateWebSummary(textContent, firstName, experienceLevel);
+    const summaryText = await generateWebSummary(
+      textContent,
+      firstName,
+      experienceLevel
+    );
 
     const summarizedImages = await Promise.all(
       captions.map(async (caption) => {
-        const imageSummary = await generateImageSummary(caption, firstName, experienceLevel);
+        const imageSummary = await generateImageSummary(
+          caption,
+          firstName,
+          experienceLevel
+        );
         return imageSummary;
       })
     );
@@ -102,12 +110,21 @@ app.post("/summarize", async (req, res) => {
     const summaryId = uuidv4();
     summaries[summaryId] = {
       summaryText,
-      images: images.map((url, index) => ({
-        url,
-        caption: summarizedImages[index],
-      })),
+      images: images.map((url, index) => {
+        let adjustedUrl = url.replace("host.docker.internal", "localhost"); // adjusted because browser renders these images, and we assume the browser is running on the local machine
+
+        if (adjustedUrl.includes("2001")) {
+          adjustedUrl = `${adjustedUrl}${summarizedImages[index]}`;
+        }
+
+        return {
+          url: adjustedUrl,
+          caption: summarizedImages[index],
+        };
+      }),
     };
 
+    console.log(`Summary ID: ${summaryId}`);
     res.json({ summaryId });
   } catch (error) {
     console.error("Error:", error.message);
@@ -136,11 +153,11 @@ async function generateWebSummary(text, firstName, experienceLevel) {
   try {
     const system = `${firstName} is a user with the following technology experience level: ${experienceLevel}. Help ${firstName} summarize the provided text without any introductory phrases or additional explanations. Only return the summary directly, and keep it under 100 words. Avoid mentioning the word limit or restating the instructions."
 
-Example 1: User: The research found that exercise has significant benefits on mental health, reducing anxiety, depression, and improving cognitive function.
+Example 1: User: Help me Summarize the following: The research found that exercise has significant benefits on mental health, reducing anxiety, depression, and improving cognitive function.
     
 Assistant: Exercise significantly benefits mental health by reducing anxiety, depression, and enhancing cognitive function.
     
-Example 2: User: Online education platforms have grown rapidly, offering flexibility, affordability, and access to a variety of courses for learners around the world.
+Example 2: User: Help me Summarize the following: Online education platforms have grown rapidly, offering flexibility, affordability, and access to a variety of courses for learners around the world.
     
 Assistant: Online education platforms provide flexible, affordable learning options with access to diverse courses globally.`;
     params.input = generateLlamaPrompt(system, text);
@@ -162,11 +179,11 @@ async function generateImageSummary(text, firstName, experienceLevel) {
   try {
     const system = `${firstName} is a user with the following technology experience level: ${experienceLevel}. Help ${firstName} summarize the provided text. Only return the summary directly, and keep it under 20 words. Avoid mentioning the word limit or restating the instructions."
 
-Example 1: User: The research found that exercise has significant benefits on mental health, reducing anxiety, depression, and improving cognitive function.
+Example 1: User: Help me Summarize the following: The research found that exercise has significant benefits on mental health, reducing anxiety, depression, and improving cognitive function.
     
 Assistant: Exercise significantly benefits mental health.
     
-Example 2: User: Online education platforms have grown rapidly, offering flexibility, affordability, and access to a variety of courses for learners around the world.
+Example 2: User: Help me Summarize the following:  Online education platforms have grown rapidly, offering flexibility, affordability, and access to a variety of courses for learners around the world.
     
 Assistant: Online education platforms provide affordable courses globally.`;
     params.input = generateLlamaPrompt(system, text);
@@ -192,7 +209,7 @@ ${startHeaderId}system${endHeaderId}
 ${systemPrompt}
 ${eotId}
 ${startHeaderId}user${endHeaderId}
-${userPrompt}
+Help me summarize this article: ${userPrompt}
 ${eotId}
 `;
 
