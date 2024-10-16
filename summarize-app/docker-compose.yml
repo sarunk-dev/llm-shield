@@ -22,17 +22,16 @@ services:
 
   frontend:
     build:
-      context: ./frontend
+      context: ./frontend-js
       dockerfile: Dockerfile
       args:
         - NODE_ENV=production
     ports:
-      - "3000:3000"
+      - "3000:80"
     environment:
       - NODE_ENV=production
       - PORT=3000
-    command: ["sh", "-c", "npm install --only=production && npm start"]
     volumes:
-      - ./frontend:/app
+      - ./frontend-js:/app
     stdin_open: true
     tty: true
