@@ -113,10 +113,6 @@ app.post("/summarize", async (req, res) => {
       images: images.map((url, index) => {
         let adjustedUrl = url.replace("host.docker.internal", "localhost"); // adjusted because browser renders these images, and we assume the browser is running on the local machine
 
-        if (adjustedUrl.includes("2001")) {
-          adjustedUrl = `${adjustedUrl}${summarizedImages[index]}`;
-        }
-
         return {
           url: adjustedUrl,
           caption: summarizedImages[index],
@@ -162,9 +158,9 @@ Example 2: User: Help me Summarize the following: Online education platforms hav
 Assistant: Online education platforms provide flexible, affordable learning options with access to diverse courses globally.`;
     params.input = generateLlamaPrompt(system, text);
     const res = await watsonxAIService.generateText(params);
-    // console.log(`*** Beginning of Text to Summarize ***\n${params.input}`);
-    // console.log(`*** End of Text to Summarize ***`);
-    // console.log("\n\n***** WEBSITE SUMMARY FROM MODEL *****");
+    // console.log(`*** Beginning of Instructions ***\n${params.input}`);
+    // console.log(`*** End of Instructions ***`);
+    // console.log("\n\n***** OUTPUT FROM MODEL *****");
     // console.log(res.result.results[0].generated_text);
     return `${res.result.results[0].generated_text}`;
   } catch (err) {
@@ -188,9 +184,9 @@ Example 2: User: Help me Summarize the following:  Online education platforms ha
 Assistant: Online education platforms provide affordable courses globally.`;
     params.input = generateLlamaPrompt(system, text);
     const res = await watsonxAIService.generateText(params);
-    // console.log(`*** Beginning of Text to Summarize ***\n${params.input}`);
-    // console.log(`*** End of Text to Summarize ***`);
-    // console.log("\n\n***** IMAGE SUMMARY FROM MODEL *****");
+    // console.log(`*** Beginning of Instructions ***\n${params.input}`);
+    // console.log(`*** End of Instructions ***`);
+    // console.log("\n\n***** OUTPUT FROM MODEL *****");
     // console.log(res.result.results[0].generated_text);
     return res.result.results[0].generated_text;
   } catch (err) {

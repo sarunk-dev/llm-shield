@@ -1,196 +1,204 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Knowledge Base Summarizer</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
     <div id="app"></div>
 
     <script>
-        // Initial navigation state
-        const state = {
-            currentPage: 'inputPage',
-            summaryId: null,
-        };
+      // Initial navigation state
+      const state = {
+        currentPage: "inputPage",
+        summaryId: null,
+      };
 
-        function render() {
-            if (state.currentPage === 'inputPage') {
-                renderInputPage();
-            } else if (state.currentPage === 'summaryPage') {
-                renderSummaryPage(state.summaryId);
+      function render() {
+        if (state.currentPage === "inputPage") {
+          renderInputPage();
+        } else if (state.currentPage === "summaryPage") {
+          renderSummaryPage(state.summaryId);
+        }
+      }
+
+      function renderInputPage() {
+        const app = document.getElementById("app");
+        app.innerHTML = "";
+
+        const container = document.createElement("div");
+        container.className = "container";
+
+        const title = document.createElement("h2");
+        title.textContent = "Knowledge Base Summarizer";
+        container.appendChild(title);
+
+        const description = document.createElement("p");
+        description.textContent =
+          "Enter your details below to get a summary of the page, including important images associated with the information.";
+        container.appendChild(description);
+
+        const nameField = document.createElement("input");
+        nameField.type = "text";
+        nameField.placeholder = "Your first name";
+        nameField.id = "firstName";
+        nameField.style.display = "block";
+        nameField.style.marginBottom = "1rem";
+        container.appendChild(nameField);
+
+        const experienceLabel = document.createElement("label");
+        experienceLabel.textContent = "Technology experience level:";
+        experienceLabel.htmlFor = "experienceLevel";
+        experienceLabel.style.display = "block";
+        experienceLabel.style.marginBottom = "0.5rem";
+        container.appendChild(experienceLabel);
+
+        const experienceSelect = document.createElement("select");
+        experienceSelect.id = "experienceLevel";
+        experienceSelect.style.display = "block";
+        experienceSelect.style.marginBottom = "1rem";
+        const experienceOptions = [
+          "No Experience",
+          "Beginner",
+          "Intermediate",
+          "Expert",
+        ];
+        experienceOptions.forEach((level) => {
+          const option = document.createElement("option");
+          option.value = level;
+          option.textContent = level;
+          experienceSelect.appendChild(option);
+        });
+        container.appendChild(experienceSelect);
+
+        const inputField = document.createElement("input");
+        inputField.type = "text";
+        inputField.placeholder = "Page to summarize";
+        inputField.id = "urlInput";
+        inputField.style.display = "block";
+        inputField.style.marginBottom = "1rem";
+        container.appendChild(inputField);
+
+        // Submit Button
+        const submitButton = document.createElement("button");
+        submitButton.textContent = "Summarize";
+        submitButton.style.display = "block";
+        submitButton.style.marginTop = "1rem";
+        submitButton.onclick = async () => {
+          const firstName = nameField.value;
+          const experienceLevel = experienceSelect.value;
+          const url = inputField.value;
+
+          if (!firstName || !url) {
+            alert("Please enter both your name and a valid URL.");
+            return;
+          }
+
+          let formattedUrl = url;
+          if (!/^https?:\/\//i.test(url)) {
+            if (/^localhost/i.test(url)) {
+              formattedUrl = "http://" + url;
+            } else {
+              formattedUrl = "https://" + url;
             }
-        }
+          }
 
-        function renderInputPage() {
-            const app = document.getElementById('app');
-            app.innerHTML = '';
-
-            const container = document.createElement('div');
-            container.className = 'container';
-            
-            const title = document.createElement('h2');
-            title.textContent = 'Knowledge Base Summarizer';
-            container.appendChild(title);
-
-            const description = document.createElement('p');
-            description.textContent = 'Enter your details below to get a summary of the page, including important images associated with the information.';
-            container.appendChild(description);
-
-            const nameField = document.createElement('input');
-            nameField.type = 'text';
-            nameField.placeholder = 'Your first name';
-            nameField.id = 'firstName';
-            nameField.style.display = 'block';
-            nameField.style.marginBottom = '1rem';
-            container.appendChild(nameField);
-
-            const experienceLabel = document.createElement('label');
-            experienceLabel.textContent = 'Technology experience level:';
-            experienceLabel.htmlFor = 'experienceLevel';
-            experienceLabel.style.display = 'block';
-            experienceLabel.style.marginBottom = '0.5rem';
-            container.appendChild(experienceLabel);
-
-            const experienceSelect = document.createElement('select');
-            experienceSelect.id = 'experienceLevel';
-            experienceSelect.style.display = 'block';
-            experienceSelect.style.marginBottom = '1rem';
-            const experienceOptions = ['No Experience', 'Beginner', 'Intermediate', 'Expert'];
-            experienceOptions.forEach(level => {
-                const option = document.createElement('option');
-                option.value = level;
-                option.textContent = level;
-                experienceSelect.appendChild(option);
+          try {
+            const backendCall = `http://localhost:3001/summarize`;
+            const response = await fetch(backendCall, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                firstName,
+                experienceLevel,
+                url: formattedUrl,
+              }),
             });
-            container.appendChild(experienceSelect);
+            const data = await response.json();
+            if (data.summaryId) {
+              state.summaryId = data.summaryId;
+              state.currentPage = "summaryPage";
+              render();
+            } else {
+              alert(
+                `An error occurred: ${data.error || "Unknown error occurred."}`
+              );
+            }
+          } catch (error) {
+            console.error("Error:", error);
+            alert(`An error occurred: ${error.message}`);
+          }
+        };
+        container.appendChild(submitButton);
 
-            const inputField = document.createElement('input');
-            inputField.type = 'text';
-            inputField.placeholder = 'Page to summarize';
-            inputField.id = 'urlInput';
-            inputField.style.display = 'block';
-            inputField.style.marginBottom = '1rem';
-            container.appendChild(inputField);
+        app.appendChild(container);
+      }
 
-            // Submit Button
-            const submitButton = document.createElement('button');
-            submitButton.textContent = 'Summarize';
-            submitButton.style.display = 'block';
-            submitButton.style.marginTop = '1rem';
-            submitButton.onclick = async () => {
-                const firstName = nameField.value;
-                const experienceLevel = experienceSelect.value;
-                const url = inputField.value;
+      function renderSummaryPage(id) {
+        const app = document.getElementById("app");
+        app.innerHTML = "";
 
-                if (!firstName || !url) {
-                    alert('Please enter both your name and a valid URL.');
-                    return;
-                }
+        const container = document.createElement("div");
+        container.className = "container";
 
-                let formattedUrl = url;
-                if (!/^https?:\/\//i.test(url)) {
-                    if (/^localhost/i.test(url)) {
-                        formattedUrl = 'http://' + url;
-                    } else {
-                        formattedUrl = 'https://' + url;
-                    }
-                }
+        fetch(`http://localhost:3001/summary/${id}`)
+          .then((response) => response.json())
+          .then((data) => {
+            if (!data) {
+              container.innerHTML = "<h5>Summary not found.</h5>";
+            } else {
+              const title = document.createElement("h2");
+              title.textContent = "Summary";
+              container.appendChild(title);
 
-                try {
-                    const backendCall = `http://localhost:3001/summarize`;
-                    const response = await fetch(backendCall, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            firstName,
-                            experienceLevel,
-                            url: formattedUrl
-                        }),
-                    });
-                    const data = await response.json();
-                    if (data.summaryId) {
-                        state.summaryId = data.summaryId;
-                        state.currentPage = 'summaryPage';
-                        render();
-                    } else {
-                        alert(`An error occurred: ${data.error || 'Unknown error occurred.'}`);
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert(`An error occurred: ${error.message}`);
-                }
+              const summaryText = document.createElement("p");
+              summaryText.innerHTML = data.summaryText;
+              container.appendChild(summaryText);
+
+              const imagesTitle = document.createElement("h3");
+              imagesTitle.textContent = "Notable Images";
+              container.appendChild(imagesTitle);
+
+              data.images.forEach((image, index) => {
+                const imageCard = document.createElement("div");
+                imageCard.className = "image-card";
+
+                const imgElement = document.createElement("img");
+                imgElement.src = image.url;
+                imgElement.alt = `Image ${index + 1}`;
+                imageCard.appendChild(imgElement);
+
+                const caption = document.createElement("p");
+                caption.innerHTML = image.caption;
+                imageCard.appendChild(caption);
+
+                container.appendChild(imageCard);
+              });
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            container.innerHTML = "<h5>Error loading summary.</h5>";
+          })
+          .finally(() => {
+            const backButton = document.createElement("button");
+            backButton.textContent = "Back to Input Page";
+            backButton.onclick = () => {
+              state.currentPage = "inputPage";
+              render();
             };
-            container.appendChild(submitButton);
+            container.appendChild(backButton);
+          });
 
-            app.appendChild(container);
-        }
+        app.appendChild(container);
+      }
 
-        function renderSummaryPage(id) {
-            const app = document.getElementById('app');
-            app.innerHTML = '';
-
-            const container = document.createElement('div');
-            container.className = 'container';
-
-            fetch(`http://localhost:3001/summary/${id}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (!data) {
-                        container.innerHTML = '<h5>Summary not found.</h5>';
-                    } else {
-                        const title = document.createElement('h2');
-                        title.textContent = 'Summary';
-                        container.appendChild(title);
-
-                        const summaryText = document.createElement('p');
-                        summaryText.innerHTML = data.summaryText;
-                        container.appendChild(summaryText);
-
-                        const imagesTitle = document.createElement('h3');
-                        imagesTitle.textContent = 'Notable Images';
-                        container.appendChild(imagesTitle);
-
-                        data.images.forEach((image, index) => {
-                            const imageCard = document.createElement('div');
-                            imageCard.className = 'image-card';
-                            
-                            const imgElement = document.createElement('img');
-                            imgElement.src = image.url;
-                            imgElement.alt = `Image ${index + 1}`;
-                            imageCard.appendChild(imgElement);
-                            
-                            const caption = document.createElement('p');
-                            caption.textContent = image.caption;
-                            imageCard.appendChild(caption);
-
-                            container.appendChild(imageCard);
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    container.innerHTML = '<h5>Error loading summary.</h5>';
-                })
-                .finally(() => {
-                    const backButton = document.createElement('button');
-                    backButton.textContent = 'Back to Input Page';
-                    backButton.onclick = () => {
-                        state.currentPage = 'inputPage';
-                        render();
-                    };
-                    container.appendChild(backButton);
-                });
-
-            app.appendChild(container);
-        }
-
-        // Initial render
-        render();
+      // Initial render
+      render();
     </script>
-</body>
+  </body>
 </html>
