@@ -20,7 +20,7 @@ services:
     stdin_open: true
     tty: true
 
-  frontend:
+  frontend-js:
     build:
       context: ./frontend-js
       dockerfile: Dockerfile
@@ -33,5 +33,21 @@ services:
       - PORT=3000
     volumes:
       - ./frontend-js:/app
+    stdin_open: true
+    tty: true
+
+  frontend-react:
+    build:
+      context: ./frontend-react
+      dockerfile: Dockerfile
+      args:
+        - NODE_ENV=production
+    ports:
+      - "3002:80"
+    environment:
+      - NODE_ENV=production
+      - PORT=3002
+    volumes:
+      - ./frontend-react:/app
     stdin_open: true
     tty: true

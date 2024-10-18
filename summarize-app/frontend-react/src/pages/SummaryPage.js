@@ -1,7 +1,7 @@
 // SummaryPage.js
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Typography, Container, Button } from '@mui/material';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { Typography, Container, Button } from "@mui/material";
 
 function SummaryPage() {
   const { id } = useParams();
@@ -17,11 +17,11 @@ function SummaryPage() {
         if (data) {
           setSummary(data);
         } else {
-          setError('Summary not found.');
+          setError("Summary not found.");
         }
       } catch (error) {
-        console.error('Error:', error);
-        setError('Error loading summary.');
+        console.error("Error:", error);
+        setError("Error loading summary.");
       }
     };
 
@@ -45,7 +45,11 @@ function SummaryPage() {
           </Typography>
           {summary.images.map((image, index) => (
             <div key={index} className="image-card">
-              <img src={image.url} alt={`Image ${index + 1}`} />
+              <img
+                src={image.url}
+                alt={`Image ${index + 1}`}
+                className="fixed-height-image"
+              />
               <Typography variant="body2">{image.caption}</Typography>
             </div>
           ))}
@@ -53,7 +57,12 @@ function SummaryPage() {
       ) : (
         <Typography variant="h5">Loading...</Typography>
       )}
-      <Button variant="contained" color="secondary" onClick={() => navigate('/')} sx={{ marginTop: '1rem' }}>
+      <Button
+        variant="contained"
+        color="secondary"
+        onClick={() => navigate("/")}
+        sx={{ marginTop: "1rem" }}
+      >
         Back to Input Page
       </Button>
     </Container>
