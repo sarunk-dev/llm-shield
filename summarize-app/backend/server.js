@@ -111,7 +111,7 @@ app.post("/summarize", async (req, res) => {
     summaries[summaryId] = {
       summaryText,
       images: images.map((url, index) => {
-        let adjustedUrl = url.replace("host.docker.internal", "localhost"); // adjusted because browser renders these images, and we assume the browser is running on the local machine
+        let adjustedUrl = url.replace("host.docker.internal", "localhost");
 
         return {
           url: adjustedUrl,
