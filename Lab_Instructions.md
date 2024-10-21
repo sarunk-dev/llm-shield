@@ -520,25 +520,49 @@ For detailed instructions on running the application and scraping the page, refe
 
 # Hands-On 4: Protections Against Denial of Service Attack
 
-Simple and fast way to protect against Denial of service are:
+In this section, we will explore practical methods to protect large language models (LLMs) from **Denial of Service (DoS)** attacks by implementing simple but effective safeguards.
 
-1. Add a max token limit: TODO Explain
-2. Add a timeout: TODO Explain
+### Basic Protections
 
-Additional steps
+1. **Add a Max Token Limit**  
+   Setting a max token limit restricts the number of tokens that the LLM can process and generate in a single response. This prevents the model from producing excessively long outputs, which could significantly increase service cost. By capping the token count, you prevent resource exhaustion from unnecessarily long responses.
 
-1. Rate limiting
-2. Add input guardrails
-   TODO: for more information on guardrails visit our Guardrails Lab
+   - *Example:* Setting a max token limit of 500 ensures the LLM stops generating output once it reaches 500 tokens, protecting against excessive output generation.
 
-For our example we will implement max token and timeout
-TODO Add explaination.
+2. **Add a Timeout**  
+   A timeout sets a maximum duration for the LLM to process and return a response. If the response takes too long, the request is cut off and an error or partial output is returned. This prevents attackers from exploiting long-running prompts to exhaust resources.
+
+   - *Example:* Setting a timeout of 5 seconds ensures that any task that takes longer is interrupted, preventing long-running processes from slowing down the system.
+
+### Additional Protections
+
+1. **Rate Limiting**  
+   Rate limiting controls how frequently requests can be made to the LLM, ensuring that the system isn’t overwhelmed by multiple requests in a short amount of time. This limits the number of queries that a user can send within a set time frame, reducing the risk of DoS attacks.
+
+2. **Add Input Guardrails**  
+   Input guardrails validate and sanitize incoming prompts before they are processed by the LLM. By filtering out potentially harmful or resource-intensive inputs, you reduce the chances of the model being overwhelmed by malicious prompts.  
+   - *For more information on guardrails, visit our Guardrails Lab.*
+
+### Example Implementation: Max Token Limit and Timeout
+
+For our example, we will implement both a **max token limit** and a **timeout** to prevent DoS attacks:
+
+1. **Max Token Limit**: We'll configure the LLM to stop generating output after reaching a set limit of tokens (e.g., 500 tokens). This will ensure that the system isn’t overloaded by excessively long responses.
+
+(TODO add instructions)
+
+2. **Timeout**: We will set a timeout of 5 seconds to ensure that no task runs indefinitely. If the model exceeds this time limit, the process will be stopped, preventing excessive wait time.
+
+(TODO add instructions)
+
+By implementing these protections, you can reduce the likelihood of a DoS attack and maintain the stability and performance of your LLM-based applications.
 
 # Conclusion
 
-As you can see, with LLMs, there are scary amount of ways to launch attacks against it. Some would argue the barrier to launching attacks are lowered because an attacker can use natural language (it can be even in different languages).
+As we've demonstrated, large language models (LLMs) present a broad range of attack vectors, many of which can be easily exploited. The barrier to launching these attacks is arguably lower than traditional methods because attackers can use natural language—potentially even in different languages—to craft malicious inputs. This ease of access highlights the importance of understanding the unique vulnerabilities of LLMs and implementing robust security measures to mitigate risks. As LLMs become more integrated into applications, proactive defenses like input validation, rate limiting, and output handling will be crucial in safeguarding against these emerging threats.
 
-# Credits
+
+# Admin
 
 ## Authors
 
