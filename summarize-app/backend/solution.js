@@ -14,7 +14,7 @@ const watsonxAIService = WatsonXAI.newInstance({
 });
 
 const textGenRequestParametersModel = {
-  max_new_tokens: 4000,
+  max_new_tokens: 1000,
   stop_sequences: ["<|eot_id|>"],
   decoding_method: "sample",
   random_seed: null,
@@ -91,6 +91,7 @@ app.post("/summarize", async (req, res) => {
     });
 
     const summaryText = await generateWebSummary(
+      // help me add a time out, if time exceeds 25 seconds, return timeout
       textContent,
       firstName,
       experienceLevel
@@ -144,28 +145,27 @@ app.get("/summary/:id", (req, res) => {
 });
 
 async function generateWebSummary(text, firstName, experienceLevel) {
-  // console.log(`*** Beginning of Text to Summarize ***\n${text}`);
-  // console.log(`*** End of Text to Summarize ***`);
-  try {
-    const system = `${firstName} is a user with the following technology experience level: ${experienceLevel}. Help ${firstName} summarize the provided text without any introductory phrases or additional explanations. Only return the summary directly, and keep it under 100 words. Avoid mentioning the word limit or restating the instructions."
+  const system = `${firstName} is a user with the following technology experience level: ${experienceLevel}. Help ${firstName} summarize the provided text without any introductory phrases or additional explanations. Only return the summary directly, and keep it under 100 words. Avoid mentioning the word limit or restating the instructions.`;
 
-Example 1: User: Help me Summarize the following: The research found that exercise has significant benefits on mental health, reducing anxiety, depression, and improving cognitive function.
-    
-Assistant: Exercise significantly benefits mental health by reducing anxiety, depression, and enhancing cognitive function.
-    
-Example 2: User: Help me Summarize the following: Online education platforms have grown rapidly, offering flexibility, affordability, and access to a variety of courses for learners around the world.
-    
-Assistant: Online education platforms provide flexible, affordable learning options with access to diverse courses globally.`;
-    params.input = generateLlamaPrompt(system, text);
-    const res = await watsonxAIService.generateText(params);
-    // console.log(`*** Beginning of Instructions ***\n${params.input}`);
-    // console.log(`*** End of Instructions ***`);
-    // console.log("\n\n***** OUTPUT FROM MODEL *****");
-    // console.log(res.result.results[0].generated_text);
-    return `${res.result.results[0].generated_text}`;
+  const prompt = generateLlamaPrompt(system, text);
+  const errorMsg = "Request timed out after 10 seconds";
+
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error(errorMsg)), 10000)
+  );
+
+  try {
+    const res = await Promise.race([
+      watsonxAIService.generateText({ ...params, input: prompt }),
+      timeoutPromise,
+    ]);
+
+    return res.result.results[0].generated_text;
   } catch (err) {
     console.warn(err);
-    return "Failed to generate summary due to an error.";
+    return err.message === errorMsg
+      ? errorMsg
+      : "Failed to generate summary due to an error.";
   }
 }
 
