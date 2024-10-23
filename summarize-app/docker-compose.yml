@@ -10,7 +10,7 @@ services:
       args:
         - NODE_ENV=production
     env_file:
-      - ./dev.env
+      - ./.env
     environment:
       - NODE_ENV=production
       - PORT=3001

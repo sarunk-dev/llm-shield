@@ -46,7 +46,7 @@ const textGenRequestModerationsModel = {
 const params = {
   input: "",
   modelId: "meta-llama/llama-3-2-3b-instruct",
-  projectId: "skills-network",
+  projectId: "6217adff-b167-4467-9298-50d6b0220292",
   parameters: textGenRequestParametersModel,
   moderations: textGenRequestModerationsModel,
 };
