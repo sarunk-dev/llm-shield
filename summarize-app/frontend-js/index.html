@@ -106,7 +106,7 @@
           }
 
           try {
-            const backendCall = `http://localhost:3001/summarize`;
+            const backendCall = `/api/summarize`;
             const response = await fetch(backendCall, {
               method: "POST",
               headers: {
@@ -145,7 +145,7 @@
         const container = document.createElement("div");
         container.className = "container";
 
-        fetch(`http://localhost:3001/summary/${id}`)
+        fetch(`/api/summary/${id}`)
           .then((response) => response.json())
           .then((data) => {
             if (!data) {
