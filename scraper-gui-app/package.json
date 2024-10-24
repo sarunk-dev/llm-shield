@@ -2,14 +2,15 @@
   "name": "scraper-gui-app",
   "version": "1.0.0",
   "description": "A simple scraping GUI app",
-  "main": "index.js",
+  "type": "module",
+  "main": "server.js",
   "scripts": {
-    "start": "live-server --port=3000",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js"
   },
-  "keywords": ["scraper", "frontend", "gui"],
-  "license": "ISC",
   "dependencies": {
-    "live-server": "^1.2.2"
+    "express": "^4.17.1",
+    "axios": "^1.4.0",
+    "cheerio": "^1.0.0-rc.10",
+    "body-parser": "^1.19.0"
   }
 }
