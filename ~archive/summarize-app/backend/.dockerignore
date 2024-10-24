@@ -1,6 +1,0 @@
-# Libraries
-node_modules
-
-# Secrets
-.env
-dev.env
