@@ -1,12 +1,53 @@
-export async function generateWebSummary(text, firstName, experienceLevel) {
-  const systemPrompt = `${firstName} is a user with the following experience level: ${experienceLevel}. Summarize the text provided in under 100 words.`;
+import { WatsonXAI } from "@ibm-cloud/watsonx-ai";
+
+const watsonxAIService = WatsonXAI.newInstance({
+  version: "2024-03-14",
+  serviceUrl: "https://us-south.ml.cloud.ibm.com",
+});
+
+const textGenRequestModerationsModel = {
+  hap: {
+    input: {
+      enabled: true,
+      threshold: 0.5,
+      mask: {
+        remove_entity_value: true,
+      },
+    },
+    output: {
+      enabled: true,
+      threshold: 0.5,
+      mask: {
+        remove_entity_value: true,
+      },
+    },
+  },
+};
+
+const textGenRequestParametersModel = {
+  max_new_tokens: 4000,
+  stop_sequences: ["<|eot_id|>"],
+  decoding_method: "sample",
+  random_seed: null,
+  temperature: 0.0,
+  top_k: 50,
+  top_p: 1,
+  repetition_penalty: 1,
+};
+
+const params = {
+  input: "",
+  modelId: "meta-llama/llama-3-2-3b-instruct",
+  projectId: "6217adff-b167-4467-9298-50d6b0220292",
+  parameters: textGenRequestParametersModel,
+  moderations: textGenRequestModerationsModel,
+};
+
+export async function generateWebSummary(text) {
+  const systemPrompt = `Summarize the text provided in under 100 words.`;
   const userPrompt = `Help me summarize this article: ${text}`;
 
-  const params = {
-    input: generateLlamaPrompt(systemPrompt, userPrompt),
-    modelId: 'meta-llama/llama-3-2-3b-instruct',
-    parameters: textGenRequestParametersModel,
-  };
+  params.input = generateLlamaPrompt(systemPrompt, userPrompt);
 
   try {
     const res = await watsonxAIService.generateText(params);
@@ -16,15 +57,11 @@ export async function generateWebSummary(text, firstName, experienceLevel) {
   }
 }
 
-export async function generateImageSummary(caption, firstName, experienceLevel) {
-  const systemPrompt = `${firstName} is a user with the following experience level: ${experienceLevel}. Summarize the caption in under 20 words.`;
+export async function generateImageSummary(caption) {
+  const systemPrompt = `Summarize the caption in under 20 words.`;
   const userPrompt = `Summarize the following caption: ${caption}`;
 
-  const params = {
-    input: generateLlamaPrompt(systemPrompt, userPrompt),
-    modelId: 'meta-llama/llama-3-2-3b-instruct',
-    parameters: textGenRequestParametersModel,
-  };
+  params.input = generateLlamaPrompt(systemPrompt, userPrompt);
 
   try {
     const res = await watsonxAIService.generateText(params);
@@ -36,9 +73,9 @@ export async function generateImageSummary(caption, firstName, experienceLevel) 
 
 // Helper function for generating the prompt
 function generateLlamaPrompt(systemPrompt, userPrompt) {
-  const startHeaderId = '<|start_header_id|>';
-  const endHeaderId = '<|end_header_id|>';
-  const eotId = '<|eot_id|>';
+  const startHeaderId = "<|start_header_id|>";
+  const endHeaderId = "<|end_header_id|>";
+  const eotId = "<|eot_id|>";
 
   return `
     ${startHeaderId}system${endHeaderId}

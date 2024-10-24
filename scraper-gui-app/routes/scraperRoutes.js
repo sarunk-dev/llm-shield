@@ -1,5 +1,7 @@
 import express from 'express';
 import { scrapeWebContent } from '../services/scraperService.js';  // Import from services
+import { generateWebSummary, generateImageSummary } from '../services/watsonxService.js';  // Import WatsonX services
+
 
 const router = express.Router();
 
@@ -14,11 +16,21 @@ router.post('/', async (req, res) => {
     // Use the service to scrape the content
     const { textContent, images, captions } = await scrapeWebContent(url);
 
-    // Send the scraped content to the frontend
+    // Generate a summary for the text content
+    const summaryText = await generateWebSummary(textContent);
+
+    // Generate summaries for the image captions
+    const summarizedCaptions = await Promise.all(
+      captions.map(async (caption) => await generateImageSummary(caption))
+    );
+
+    // Return the summarized text and captions along with image URLs
     res.json({
-      text: textContent,
-      images: images,
-      captions: captions,
+      summaryText,
+      images: images.map((url, index) => ({
+        url,
+        caption: summarizedCaptions[index],
+      })),
     });
   } catch (error) {
     console.error('Error scraping the page:', error.message);
