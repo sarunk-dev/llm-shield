@@ -44,8 +44,8 @@ const params = {
 };
 
 export async function generateWebSummary(text) {
-  const systemPrompt = `Summarize the text provided in under 100 words.`;
-  const userPrompt = `Help me summarize this article: ${text}`;
+  const systemPrompt = `You are a helpful assistant.`;
+  const userPrompt = `Help me summarize this text in under 100 words: ${text}`;
 
   params.input = generateLlamaPrompt(systemPrompt, userPrompt);
 
@@ -58,8 +58,8 @@ export async function generateWebSummary(text) {
 }
 
 export async function generateImageSummary(caption) {
-  const systemPrompt = `Summarize the caption in under 20 words.`;
-  const userPrompt = `Summarize the following caption: ${caption}`;
+  const systemPrompt = `You are a helpful assistant.`;
+  const userPrompt = `Summarize the following text: ${caption}`;
 
   params.input = generateLlamaPrompt(systemPrompt, userPrompt);
 
@@ -84,5 +84,6 @@ function generateLlamaPrompt(systemPrompt, userPrompt) {
     ${startHeaderId}user${endHeaderId}
     ${userPrompt}
     ${eotId}
+    ${startHeaderId}assistant${endHeaderId}
   `;
 }
