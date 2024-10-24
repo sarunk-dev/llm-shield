@@ -18,12 +18,13 @@ app.use(express.json());
 // Serve static files (HTML, CSS, JS)
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Mount scraper routes at /scrape
+app.use('/scrape', scraperRoutes);
+
 // Catch-all to serve index.html for undefined routes
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
-
-app.use('/scrape', scraperRoutes);
 
 // Start the server
 app.listen(PORT, () => {
