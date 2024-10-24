@@ -6,7 +6,7 @@ import {
 } from "../services/watsonxService.js";
 
 const router = express.Router();
-let summaryData = {};
+let summaryData = {}; // Store the summary data in-memory
 
 router.post("/", async (req, res) => {
   const { url } = req.body;
@@ -16,13 +16,15 @@ router.post("/", async (req, res) => {
   }
 
   try {
-    console.log("Now scraping")
+    console.log("Now scraping");
     const { textContent, images, captions } = await scrapeWebContent(url);
     const summaryText = await generateWebSummary(textContent);
     const summarizedCaptions = await Promise.all(
       captions.map(async (caption) => await generateImageSummary(caption))
     );
-    console.log("Scraping Complete")
+
+    console.log("Scraping Complete");
+
     summaryData = {
       summaryText,
       images: images.map((url, index) => ({
@@ -31,14 +33,14 @@ router.post("/", async (req, res) => {
       })),
     };
 
-    res.redirect('/summary.html');
+    res.status(200).json({ success: true });
   } catch (error) {
     console.error("Error scraping the page:", error.message);
     res.status(500).json({ error: "Failed to scrape the page" });
   }
 });
 
-router.get('/get-summary', (req, res) => {
+router.get("/get-summary", (req, res) => {
   res.json(summaryData);
 });
 

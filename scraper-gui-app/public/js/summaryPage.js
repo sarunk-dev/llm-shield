@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    console.log("Fetching scraped data from backend")
+    console.log("Fetching scraped data from backend");
     const response = await fetch('/scrape/get-summary'); 
     const data = await response.json();
     console.log('Received data:', data);
