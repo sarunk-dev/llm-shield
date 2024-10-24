@@ -84,6 +84,5 @@ function generateLlamaPrompt(systemPrompt, userPrompt) {
     ${startHeaderId}user${endHeaderId}
     ${userPrompt}
     ${eotId}
-    ${startHeaderId}assistant${endHeaderId}
   `;
 }
