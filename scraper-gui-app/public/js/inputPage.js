@@ -2,8 +2,7 @@ document.getElementById('url-form').addEventListener('submit', async function (e
   e.preventDefault();
 
   const url = document.getElementById('url-input').value;
-
-  // Send the URL to the backend to scrape it
+  console.log(`url to scrape: ${url}`)
   const response = await fetch('/scrape', {
     method: 'POST',
     headers: {
