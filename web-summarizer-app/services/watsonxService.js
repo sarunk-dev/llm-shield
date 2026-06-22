@@ -25,7 +25,7 @@ const textGenRequestModerationsModel = {
 };
 
 const textGenRequestParametersModel = {
-  max_new_tokens: 4000,
+  max_new_tokens: 1000,
   stop_sequences: ["<|eot_id|>"],
   decoding_method: "sample",
   random_seed: null,
@@ -43,19 +43,25 @@ const params = {
   moderations: textGenRequestModerationsModel,
 };
 
-export async function generateWebSummary(text) {
-  const systemPrompt = `You are a helpful assistant.`;
-  const userPrompt = `Help me summarize this text in under 100 words: ${text}`;
-
-  params.input = generateLlamaPrompt(systemPrompt, userPrompt);
-
-  try {
-    const res = await watsonxAIService.generateText(params);
-    return res.result.results[0].generated_text;
-  } catch (error) {
-    throw new Error(`Failed to generate summary: ${error.message}`);
+export async function generateWebSummary(text, firstName, experienceLevel) {
+    const errorMsg = "Request timed out after 20 seconds";
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error(errorMsg)), 20000)
+    );
+  
+    try {
+      const res = await Promise.race([
+        watsonxAIService.generateText({ ...params }),
+        timeoutPromise,
+      ]);
+  
+      return res.result.results[0].generated_text;
+    } catch (err) {
+      return err.message === errorMsg
+        ? errorMsg
+        : "Failed to generate summary due to an error.";
+    }
   }
-}
 
 export async function generateImageSummary(caption) {
   const systemPrompt = `You are a helpful assistant.`;
